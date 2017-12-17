@@ -1,0 +1,14 @@
+kafka:
+  container_name: kafka
+  image: spotify/kafka
+  hostname: kafka
+  ports:
+    - "2181:2181"
+    - "9092:9092"
+crowdnav:
+  build: .
+  # image: starofall/crowdnav
+  container_name: crowdnav
+  hostname: crowdnav
+  links: 
+    - kafka
