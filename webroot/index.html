@@ -16,129 +16,137 @@ limitations under the License.
 -->
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>MAPS!</title>
-        <style>
-            /* Always set the map height explicitly to define the size of the div
+
+<head>
+    <title>MAPS!</title>
+    <style>
+        /* Always set the map height explicitly to define the size of the div
              * element that contains the map. */
-            #map {
-                height: 100%;
-            }
-            /* Optional: Makes the sample page fill the window. */
-            html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
 
-        </style>
+        #map {
+            height: 100%;
+        }
 
-        <script src="js/vertx/sockjs.min.js"></script>
-        <script src="js/vertx/vertxbus.js"></script>
-        <!-- Google Maps -->
-        <link href="https://google-developers.appspot.com/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbKXTPdUuKimkq5ONrChpNuxnI5SMhMUI&libraries=visualization"></script>
-        <script src="js/jquery/jquery.min.js"></script>
-        <script src="js/jquery/jquery-ui-widget.min.js"></script>
-        <script src="js/bootstrap/js/bootstrap.min.js"></script>
+        /* Optional: Makes the sample page fill the window. */
 
-    </head>
-    <body onload="initMap()">
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 
-        <div id="map"></div>
-        <script>
+    <script src="js/vertx/sockjs.min.js"></script>
+    <script src="js/vertx/vertxbus.js"></script>
+    <!-- Google Maps -->
+    <link href="https://google-developers.appspot.com/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css"
+    />
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbKXTPdUuKimkq5ONrChpNuxnI5SMhMUI&libraries=visualization"></script>
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/jquery/jquery-ui-widget.min.js"></script>
+    <script src="js/bootstrap/js/bootstrap.min.js"></script>
 
-            var map, heatmap, dt;
-            var points = [];
-            var tempdata = [];
-            var ccount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-            var locations = [
-                [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0],
-                [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
-				
-			//6.12.2017
-			var markers = new Array();
-			var info_windows = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
-			
-			
-			//
+</head>
+
+<body onload="initMap()">
+
+    <div id="map"></div>
+    <script>
+
+        var map, heatmap, dt;
+        var points = [];
+        var tempdata = [];
+        var ccount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var locations = [
+            [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0],
+            [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+
+        //6.12.2017
+        var markers = new Array();
+        var info_windows = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
 
 
-            function initMap() {
-                map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 13,
-                    center: {lat: 43.324722, lng: 21.903333},
-                    mapTypeId: google.maps.MapTypeId.HYBRID
-                });
-                ;
-                tempdata.push(new google.maps.LatLng(0, 0))
-                heatmap = new google.maps.visualization.HeatmapLayer({
-                    data: tempdata,
-                    map: map
-                });
+        //
 
-            }
 
-            var eb = new vertx.EventBus("http://192.168.0.107:8080/eventbus");
-            eb.onopen = function () {
-                console.log("open");
-                eb.registerHandler("waittime", function (data) {
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: { lat: 43.324722, lng: 21.903333 },
+                mapTypeId: google.maps.MapTypeId.HYBRID
+            });
+            ;
+            tempdata.push(new google.maps.LatLng(0, 0))
+            heatmap = new google.maps.visualization.HeatmapLayer({
+                data: tempdata,
+                map: map
+            });
 
-                    var msg = JSON.parse(data);
-                    var cluster = msg.cid;
-                    var lat = msg.lat;
-                    var lon = msg.lon;
-                    if (ccount[cluster] < 1) {
-                        locations[cluster][0] = msg.clat;
-                        locations[cluster][1] = msg.clon;
-                        var marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(locations[cluster][0], locations[cluster][1]),
-                            label: String(cluster),
-                            map: map
-                        });
-						marker.cid = cluster;
-						info_windows[cluster] = new google.maps.InfoWindow({
-							content: "<div><p>Some content</p></div>"
-						});
-						marker.addListener('click', function() {
-							info_windows[this.cid].open(map, marker);
-						});
+        }
+
+        var eb = new vertx.EventBus("http://192.168.0.107:8080/eventbus");
+        eb.onopen = function () {
+            console.log("open");
+            eb.registerHandler("dashboard", function (data) {
+
+                var msg = JSON.parse(data);
+                var cluster = msg.cid;
+                var lat = msg.lat;
+                var lon = msg.lon;
+                if (ccount[cluster] < 1) {
+                    locations[cluster][0] = msg.clat;
+                    locations[cluster][1] = msg.clon;
+                    var marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(locations[cluster][0], locations[cluster][1]),
+                        label: String(cluster),
+                        map: map
+                    });
+                    marker.cid = cluster;
+                    info_windows[cluster] = new google.maps.InfoWindow({
+                        content: "<div><p>Delays:</p></div>"
+                    });
+                    marker.addListener('click', function () {
+                        info_windows[this.cid].open(map, marker);
+                    });
+                }
+                ccount[cluster] = ccount[cluster] + 1;
+                //console.log(msg);
+                //console.log("clusterid " + cluster + " count " + ccount[cluster]);
+                points = points.concat(new google.maps.LatLng(lat, lon));
+                heatmap.setData(points);
+            });
+        };
+
+        var delays = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+
+        var eb2 = new vertx.EventBus("http://192.168.0.107:8081/eventbus");
+        eb2.onopen = function () {
+            console.log("open delays");
+            eb2.registerHandler("delays", function (data) {
+                var msg = JSON.parse(data);
+                console.log(msg);
+
+                var cluster = msg.cid;
+                var startTime = msg.startTime;
+                var endTime = msg.endTime;
+                var maxVehicles = msg.maxVehicles;
+
+                if (typeof info_windows[cluster] !== "undefined") {
+                    try {
+                        var str = info_windows[cluster].getContent();
+                        info_windows[cluster].setContent(str + "<div><p>" + msg.cid + " " + msg.startTime + " " + msg.endTime + " " + maxVehicles + "</p></div>");
                     }
-                    ccount[cluster] = ccount[cluster] + 1;
-                    //console.log(msg);
-                    //console.log("clusterid " + cluster + " count " + ccount[cluster]);
-                    points = points.concat(new google.maps.LatLng(lat, lon));
-                    heatmap.setData(points);
-                });
-            };
+                    catch (ex) {
+                        //console.log("Exception"+ex);
+                    }
+                }
 
-            var delays = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+                delays[cluster].push(msg);
+            });
+        };
+    </script>
 
-            var eb2 = new vertx.EventBus("http://192.168.0.107:8081/eventbus");
-            eb2.onopen = function () {
-                console.log("open delays");
-                eb2.registerHandler("delays", function (data) {
-                    var msg = JSON.parse(data);
-                    console.log(msg);
+</body>
 
-                    var cluster = msg.cid;
-                    var startTime = msg.startTime;
-                    var endTime = msg.endTime;
-                    var maxVehicles = msg.maxVehicles;
-
-					if(typeof info_windows[cluster] !== "undefined"){
-					try{
-							info_windows[cluster].setContent("<div><p>"+msg.cid+" "+msg.startTime+" "+msg.endTime+" "+maxVehicles+"</p></div>");
-						}
-							catch(ex){
-							console.log("Exception"+ex);
-							}
-						}
-					
-                    delays[cluster].push(msg);
-                });
-            };
-        </script>
-
-    </body>
 </html>
