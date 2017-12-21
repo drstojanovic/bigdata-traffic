@@ -88,7 +88,7 @@ limitations under the License.
         var eb = new vertx.EventBus("http://192.168.0.107:8080/eventbus");
         eb.onopen = function () {
             console.log("open");
-            eb.registerHandler("dashboard", function (data) {
+            eb.registerHandler("waittime", function (data) {
 
                 var msg = JSON.parse(data);
                 var cluster = msg.cid;
@@ -135,7 +135,7 @@ limitations under the License.
                 if (typeof info_windows[cluster] !== "undefined") {
                     try {
                         var str = info_windows[cluster].getContent();
-                        info_windows[cluster].setContent(str + "<div><p>" + msg.cid + " " + msg.startTime + " " + msg.endTime + " " + maxVehicles + "</p></div>");
+                        info_windows[cluster].setContent(str + "<div><p><b>Cluster id:</b> " + msg.cid + " <b>Start:</b> " + msg.startTime + " <b>End:</b> " + msg.endTime + " <b>No.Vehicles:</b> " + maxVehicles + "</p></div>");
                     }
                     catch (ex) {
                         //console.log("Exception"+ex);
