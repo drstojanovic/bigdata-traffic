@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -231,9 +232,9 @@ public class NisWaitTime implements Serializable {
                             return new WaitTime(p[0], str._2, Double.valueOf(p[1]), Double.valueOf(p[2]));
                         });
 
-                waitTimes.foreach((arg0) -> {
-                    System.out.println("found car ! " + arg0.id + " wait time: " + arg0.wait);
-                });
+//                waitTimes.foreach((arg0) -> {
+//                    System.out.println("found car ! " + arg0.id + " wait time: " + arg0.wait);
+//                });
 
                 if (waitTimes.count() > 0) {
 
@@ -260,12 +261,23 @@ public class NisWaitTime implements Serializable {
 
                         Dataset<String> tRDD = res.toJSON();
 
-                        tRDD.foreach(record -> {
+                        tRDD.foreachPartition(partition -> {
                             KafkaProducer producer = new KafkaProducer<>(configureProducer());
-                            ProducerRecord<String, String> message = new ProducerRecord<>(topicp, record);
-                            producer.send(message);
+                            
+                            while (partition.hasNext()) {
+                                String record = partition.next();
+                                ProducerRecord<String, String> message = new ProducerRecord<>(topicp, record);
+                                producer.send(message);
+                            }
                             producer.close();
                         });
+
+//                        tRDD.foreach(record -> {
+//                            KafkaProducer producer = new KafkaProducer<>(configureProducer());
+//                            ProducerRecord<String, String> message = new ProducerRecord<>(topicp, record);
+//                            producer.send(message);
+//                            producer.close();
+//                        });
                     }
                 }
             }

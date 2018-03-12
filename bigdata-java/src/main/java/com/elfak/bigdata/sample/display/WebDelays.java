@@ -30,7 +30,7 @@ public class WebDelays {
 
     public static void main(String[] args) throws Exception {
 
-        httpPort = 8081;
+        httpPort = 9502;
         String uberTopic = "nis-delays";
 
         Vertx vertx = Vertx.vertx();

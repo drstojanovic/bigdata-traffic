@@ -30,7 +30,7 @@ public class WebWaitTime {
 
     public static void main(String[] args) throws Exception {
 
-        httpPort = 8080;
+        httpPort = 9501;
         String uberTopic = "nis-out";
 
         Vertx vertx = Vertx.vertx();
