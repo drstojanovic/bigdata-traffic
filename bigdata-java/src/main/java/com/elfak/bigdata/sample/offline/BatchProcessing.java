@@ -1,4 +1,4 @@
-package com.elfak.bigdata.sample.offline;
+﻿package com.elfak.bigdata.sample.offline;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -48,6 +48,7 @@ public class BatchProcessing {
 
     static String master;
     static String modelPath;
+    static String savePath;
 
     private static void processParamteres(String[] args) {
         master = "local[*]";
@@ -55,17 +56,21 @@ public class BatchProcessing {
             master = args[0];
         }
         modelPath = "data\\offline.csv";
+        if (args.length >= 2) {
+            modelPath = args[1];
+        }
+        savePath = "output.csv";
         if (args.length >= 3) {
-            modelPath = args[2];
+            savePath = args[2];
         }
     }
 
     public static void main(String[] args) throws IOException {
 
         processParamteres(args);
-        
+
         SparkSession spark = SparkSession.builder()
-                .appName("bath_processing")
+                .appName("BatchProcessing")
                 .master(master)
                 //.config("spark.sql.warehouse.dir", "file:///tmp/spark-warehouse")
                 .getOrCreate();
@@ -130,7 +135,12 @@ public class BatchProcessing {
             //dataset.select("key", "value").orderBy(functions.desc("value")).limit(100);
             new_ds.show();
 
-            new_ds.toJavaRDD().saveAsTextFile("output");
+            //new_ds.toJavaRDD().saveAsTextFile("output");
+            new_ds.repartition(1)
+                    .write()
+                    .format("com.databricks.spark.csv")
+                    .option("header", true)
+                    .save(savePath);
 
         } catch (Exception e) {
             e.printStackTrace();
