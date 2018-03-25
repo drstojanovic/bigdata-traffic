@@ -78,28 +78,17 @@ class Simulation(object):
                 CarRegistry.findById(removedCarId).setArrived(cls.tick)
             
             for allCarId in traci.vehicle.getIDList():
-                w_time = traci.vehicle.getWaitingTime(allCarId)
-                #if c > 60.0:
-                # w_time = c
-                x_cord, y_cord = traci.vehicle.getPosition(allCarId)
-                g_lng, g_lat = traci.simulation.convertGeo(x_cord, y_cord)
-                
-                # log to kafka
-                msgWaitTime = str(allCarId) + "," + str(w_time) + "," + str(g_lat) + "," + str(g_lng)
-                RTXForword.publish(msgWaitTime, Config.kafkaTopicNis)
-                if w_time >= 59.0:
-                    traci.vehicle.setColor(allCarId, (0, 0, 255, 0))
-                    print(msgWaitTime)
-                    # CSVLogger.logEvent("wait", [allCarId, w_time, g_lat, g_lng])
-                # print("Car id: " + str(allCarId) + " Time: " + str(w_time) + " Position: (" + str(g_lat) + "," + str(g_lng) + ")")
+                road_id = traci.vehicle.getRoadID(allCarId)
+                road_name = [x.getName() for x in Network.edges if x.getID()==road_id][0];
+                CSVLogger.logEvent("offline", [allCarId, road_id, road_name.encode("utf8"), cls.tick])
 
             timeBeforeCarProcess = current_milli_time()
             # let the cars process this step
             CarRegistry.processTick(cls.tick)
             # log time it takes for routing
-            #msg = dict()
-            #msg["duration"] = current_milli_time() - timeBeforeCarProcess
-            #RTXForword.publish(msg, Config.kafkaTopicRouting)
+            msg = dict()
+            msg["duration"] = current_milli_time() - timeBeforeCarProcess
+            RTXForword.publish(msg, Config.kafkaTopicRouting)
 
             # if we enable this we get debug information in the sumo-gui using global traveltime
             # should not be used for normal running, just for debugging

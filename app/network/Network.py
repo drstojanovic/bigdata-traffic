@@ -24,6 +24,7 @@ class Network(object):
     nodeIds = None
     edgeIds = None
     routingEdges = None
+    edgeNames = None
 
     @classmethod
     def loadNetwork(cls):
@@ -38,6 +39,7 @@ class Network(object):
         """ internal method for applying the values of a SUMO map """
         cls.nodeIds = map(lambda x: x.getID(), net.getNodes())  # type: list[str]
         cls.edgeIds = map(lambda x: x.getID(), net.getEdges())  # type: list[str]
+        cls.edgeNames = map(lambda x: x.getName(), net.getEdges())  # type: list[str]
         cls.nodes = net.getNodes()
         cls.edges = net.getEdges()
         cls.routingEdges = map(lambda x: RoutingEdge(x), net.getEdges())
