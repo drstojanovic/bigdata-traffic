@@ -1,4 +1,4 @@
-﻿package com.elfak.bigdata.sample.offline;
+package com.elfak.bigdata.sample.offline;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
